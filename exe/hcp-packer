@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "dry/cli"
+
+require "zeitwerk"
+loader = Zeitwerk::Loader.new
+loader.push_dir("lib")
+loader.inflector.inflect("cli" => "CLI")
+loader.inflector.inflect("hcp_packer" => "HCPPacker")
+loader.setup
+loader.eager_load
+
+module HCPPacker
+  module CLI
+    extend Dry::CLI::Registry
+
+    register "auth", Auth
+    # register "list-buckets", ListBuckets
+  end
+end
+
+Dry::CLI.new(HCPPacker::CLI).call
