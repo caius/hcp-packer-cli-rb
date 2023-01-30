@@ -2,9 +2,8 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "dry/cli"
+Bundler.require(:default)
 
-require "zeitwerk"
 loader = Zeitwerk::Loader.new
 loader.push_dir("lib")
 loader.inflector.inflect("cli" => "CLI")
