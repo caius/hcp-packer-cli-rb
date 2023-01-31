@@ -4,6 +4,9 @@
 require "bundler/setup"
 Bundler.require(:default)
 
+# FIXME: debugging
+require "pp"
+
 loader = Zeitwerk::Loader.new
 loader.push_dir("lib")
 loader.inflector.inflect("cli" => "CLI")
@@ -17,6 +20,7 @@ module HCPPacker
 
     register "auth", Auth
     register "list-buckets", ListBuckets
+    register "list-channels", ListChannels
   end
 end
 
