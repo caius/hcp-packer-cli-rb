@@ -12,9 +12,20 @@ module HCPPacker
       end
 
       def call
+        # Check if we have valid auth saved
+        if (auth = config[:auth])
+          valid_until = auth[:acquired_at] + auth["expires_in"]
+          if Time.now.to_i < valid_until
+            puts "Access still valid until #{Time.at(valid_until)}, all good"
+            return
+          else
+            config[:auth] = nil
+            puts "Access invalid, obtaining new token"
+          end
+        end
 
         url = URI("https://auth.hashicorp.com/oauth/token")
-        Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
+        res = Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
           req = Net::HTTP::Post.new(url)
           req["Content-Type"] = "application/json"
           req.body = JSON.dump({
@@ -24,10 +35,22 @@ module HCPPacker
             client_secret: ENV.fetch("HCP_CLIENT_SECRET"),
           })
 
-          res = http.request(req)
-          p res, res.body
+          http.request(req)
         end
 
+        unless res.is_a?(Net::HTTPSuccess)
+          raise "Error authenticating: #{res.body.inspect}"
+        end
+
+        data = JSON.parse(res.body)
+        data[:acquired_at] = Time.now.to_i
+        config[:auth] = data
+
+        puts "Authenticated successfully"
+      end
+
+      def config
+        HCPPacker.config
       end
     end
   end
