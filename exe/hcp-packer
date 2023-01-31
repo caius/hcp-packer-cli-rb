@@ -16,7 +16,7 @@ module HCPPacker
     extend Dry::CLI::Registry
 
     register "auth", Auth
-    # register "list-buckets", ListBuckets
+    register "list-buckets", ListBuckets
   end
 end
 
