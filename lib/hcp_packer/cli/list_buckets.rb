@@ -8,7 +8,11 @@ require "tty/table"
 module HCPPacker
   module CLI
     class ListBuckets < Dry::CLI::Command
-      def call
+      desc "List buckets (images)"
+
+      option :json, type: :boolean, default: false, desc: "Output JSON"
+
+      def call(json:)
 
         url = URI("https://api.cloud.hashicorp.com/packer/2021-04-30/organizations/#{organization_id}/projects/#{project_id}/images")
 
@@ -24,6 +28,11 @@ module HCPPacker
         end
 
         buckets = JSON.parse(res.body).fetch("buckets")
+
+        if json
+          puts JSON.dump(buckets)
+          return
+        end
 
         cols2data = [
           {
