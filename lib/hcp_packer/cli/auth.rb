@@ -31,8 +31,8 @@ module HCPPacker
           req.body = JSON.dump({
             audience: "https://api.hashicorp.cloud",
             grant_type: "client_credentials",
-            client_id: ENV.fetch("HCP_CLIENT_ID"),
-            client_secret: ENV.fetch("HCP_CLIENT_SECRET"),
+            client_id: @client_id,
+            client_secret: @client_secret,
           })
 
           http.request(req)
