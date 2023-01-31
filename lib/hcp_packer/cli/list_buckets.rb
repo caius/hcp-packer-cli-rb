@@ -71,7 +71,7 @@ module HCPPacker
           table << cols2data.map { |d| d[:finder].call(data) }
         end
 
-        puts table.render(:basic)
+        puts table.render(:unicode, padding: [0, 1, 0, 1])
       end
 
       def access_token
