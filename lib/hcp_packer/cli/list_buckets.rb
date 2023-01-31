@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-require "net/http"
 require "json"
-require "pp"
+require "net/http"
+require "time"
+require "tty/table"
 
 module HCPPacker
   module CLI
@@ -22,7 +23,46 @@ module HCPPacker
           raise "Error making request #{res.body.inspect}"
         end
 
-        pp JSON.parse(res.body).fetch("buckets")
+        buckets = JSON.parse(res.body).fetch("buckets")
+
+        cols2data = [
+          {
+            name: "Image ID",
+            finder: -> { "#{_1.fetch("slug")} [#{_1.fetch("id")}]" }
+          },
+          {
+            name: "Latest Iteration",
+            finder: -> { _1.fetch("latest_version") }
+          },
+          # {
+          #   name: "Status",
+          #   finder: -> { _1.dig("???") }
+          # },
+          # {
+          #   name: "Parents",
+          #   finder: -> { _1.dig("parents") || "-" }
+          # }
+          {
+            name: "Platforms",
+            finder: -> { 
+              _1.dig("platforms").
+                tap { |arr| arr << "-" if arr.empty? }.
+                join(", ")
+            }
+          },
+          {
+            name: "Updated At",
+            finder: -> { Time.parse(_1.fetch("updated_at")).to_s }
+          },
+        ]
+
+        table = TTY::Table.new(header: cols2data.map { |d| d[:name] })
+
+        buckets.each do |data|
+          table << cols2data.map { |d| d[:finder].call(data) }
+        end
+
+        puts table.render(:basic)
       end
 
       def access_token
