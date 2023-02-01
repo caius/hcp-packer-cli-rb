@@ -39,7 +39,7 @@ module HCPPacker
         cols2data = [
           {
             name: "Channel",
-            finder: -> { "#{_1.fetch("slug")} [#{_1.fetch("id")}]" }
+            finder: -> { _1.fetch("slug") }
           },
           {
             name: "Active Iteration",
@@ -51,12 +51,15 @@ module HCPPacker
             }
           },
           {
-            name: "Assigned",
+            name: "Assigned By",
+            finder: -> { _1.dig("pointer", "author_id") }
+          },
+          {
+            name: "Assigned At",
             finder: -> { 
               pointer = _1.dig("pointer")
               assigned_at = Time.parse(pointer.dig("created_at"))
-              author = pointer.dig("author_id")
-              "#{assigned_at.strftime("%Y-%m-%d %H:%M:%s")} by #{author}"
+              assigned_at.strftime("%Y-%m-%d %H:%M:%S")
             }
           },
         ]

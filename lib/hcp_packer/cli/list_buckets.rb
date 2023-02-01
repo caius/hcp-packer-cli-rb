@@ -37,11 +37,18 @@ module HCPPacker
         cols2data = [
           {
             name: "Image ID",
-            finder: -> { "#{_1.fetch("slug")} [#{_1.fetch("id")}]" }
+            finder: -> { _1.fetch("slug") }
           },
           {
             name: "Latest Iteration",
-            finder: -> { _1.fetch("latest_version") }
+            finder: -> {
+              version = _1.fetch("latest_version")
+              if version.zero?
+                "Incomplete"
+              else
+                "#{version} (#{_1.dig("latest_iteration", "fingerprint")[0..8]})"
+              end
+            }
           },
           # {
           #   name: "Status",
