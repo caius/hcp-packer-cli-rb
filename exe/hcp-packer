@@ -21,6 +21,7 @@ module HCPPacker
     register "auth", Auth
     register "list-buckets", ListBuckets
     register "list-channels", ListChannels
+    register "list-iterations", ListIterations
   end
 end
 
