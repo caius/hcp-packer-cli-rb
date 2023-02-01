@@ -50,10 +50,17 @@ module HCPPacker
               end
             }
           },
-          # {
-          #   name: "Status",
-          #   finder: -> { _1.dig("???") }
-          # },
+          {
+            name: "Status",
+            finder: -> {
+              statuses = _1.dig("latest_iteration", "builds").map { |b| b["status"].downcase }.flatten.sort.uniq
+              if statuses == %w[done]
+                "Active"
+              else
+                "Failed"
+              end
+            }
+          },
           # {
           #   name: "Parents",
           #   finder: -> { _1.dig("parents") || "-" }
