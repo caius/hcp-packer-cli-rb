@@ -19,13 +19,10 @@ module HCPPacker
       # Auth if we need to
       # FIXME: check expiration time of token - if we ran that long
       unless @token
-        p "fetching token"
         @token = fetch_token
       end
 
-      p @token
-
-      url = URI("https://api.cloud.hashicorp.com/packer/2021-04-30/organizations/#{@organization_id}/projects/#{@project_id}/#{path}")
+      url = URI("https://api.cloud.hashicorp.com/packer/2021-04-30/organizations/#{@organization_id}/projects/#{@project_id}#{path}")
 
       res = Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
         req = Net::HTTP::Get.new(url)
