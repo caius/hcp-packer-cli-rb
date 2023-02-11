@@ -10,21 +10,9 @@ module HCPPacker
       option :json, type: :boolean, default: false, desc: "Output JSON"
 
       def call(bucket_name:, json:)
-
-        url = URI("https://api.cloud.hashicorp.com/packer/2021-04-30/organizations/#{ENV["HCP_ORGANIZATION_ID"]}/projects/#{ENV["HCP_PROJECT_ID"]}/images/#{bucket_name}/iterations")
-
-        res = Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
-          req = Net::HTTP::Get.new(url)
-          req["Authorization"] = "Bearer #{access_token}"
-          req["Content-Type"] = "application/json"
-          http.request(req)
-        end
-
-        unless res.is_a?(Net::HTTPSuccess)
-          raise "Error making request #{res.body.inspect}"
-        end
-
-        iterations = JSON.parse(res.body).fetch("iterations")
+        client = HCPPacker::Client.new
+        data = client.get("/images/#{bucket_name}/iterations")
+        iterations = data.fetch("iterations")
 
         if json
           puts JSON.dump(iterations)
@@ -33,23 +21,10 @@ module HCPPacker
 
         # Grab channels for that column
 
-        channel_url = URI("https://api.cloud.hashicorp.com/packer/2021-04-30/organizations/#{ENV["HCP_ORGANIZATION_ID"]}/projects/#{ENV["HCP_PROJECT_ID"]}/images/#{bucket_name}/channels")
-
-        channel_res = Net::HTTP.start(channel_url.host, channel_url.port, use_ssl: true) do |http|
-          req = Net::HTTP::Get.new(channel_url)
-          req["Authorization"] = "Bearer #{access_token}"
-          req["Content-Type"] = "application/json"
-          http.request(req)
-        end
-
-        unless channel_res.is_a?(Net::HTTPSuccess)
-          raise "Error making request #{channel_res.body.inspect}"
-        end
-
-        channels = JSON.parse(channel_res.body).fetch("channels")
+        channel_data = client.get("/images/#{bucket_name}/channels")
+        channels = channel_data.fetch("channels")
 
         # Show the data
-
         cols2data = [
           {
             name: "Iteration",

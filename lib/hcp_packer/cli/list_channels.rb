@@ -15,21 +15,9 @@ module HCPPacker
       option :json, type: :boolean, default: false, desc: "Output JSON"
 
       def call(bucket_name:, json:)
-
-        url = URI("https://api.cloud.hashicorp.com/packer/2021-04-30/organizations/#{ENV["HCP_ORGANIZATION_ID"]}/projects/#{ENV["HCP_PROJECT_ID"]}/images/#{bucket_name}/channels")
-
-        res = Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
-          req = Net::HTTP::Get.new(url)
-          req["Authorization"] = "Bearer #{access_token}"
-          req["Content-Type"] = "application/json"
-          http.request(req)
-        end
-
-        unless res.is_a?(Net::HTTPSuccess)
-          raise "Error making request #{res.body.inspect}"
-        end
-
-        channels = JSON.parse(res.body).fetch("channels")
+        client = HCPPacker::Client.new
+        data = client.get("/images/#{bucket_name}/channels")
+        channels = data.fetch("channels")
 
         if json
           puts JSON.dump(channels)
